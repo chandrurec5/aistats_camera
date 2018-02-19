@@ -1,0 +1,63 @@
+%!TEX root =  flsa.tex
+\section{Introduction}\label{sec:intro}
+We study the following linear stochastic approximation (LSA) algorithm: 
+\begin{align}\label{eq:lsaintro}
+\theta_t=\theta_{t-1}+\alpha_t (b_t-A_t \theta_{t-1}),
+\end{align}
+which specifies the evolution of iterates $\theta_t\in\R^d\forall t\geq 1$ with initialization $\theta_0\in\R^d$. Further, $(b_t,A_t)\in\R\times \R^{\dcd}$ is a \emph{noisy} data sequence ( $\overset{i.i.d}{\sim} P$ with bounded variance) and $(\alpha_t)$ a positive step-size sequence chosen by the user. In some scenarios, $A_t\,$s are rank-$1$ matrices and $b_t -A_t\theta_{t-1}$ can be computed in $O(d)$. Some examples of such LSA algorithms include the stochastic gradient descent algorithm (SGD) for the problem of linear prediction \cite{bach,bachaistats}, and the \emph{temporal difference} (TD) class of learning algorithms for approximate policy evaluation (APE) in reinforcement learning(RL) \cite{sutton,konda-tsitsiklis,KoTsi03:LSA,gtd,gtd2,gtdmp}.
+\todoc{konda-tsitsiklis reference resolved to tsitsiklis-van-roy. is this what you want?? I also added KoTsi03:LSA, maybe that's what you wanted.}
+%An additional feature in these class of applications is that $A_t$ turns out to be a rank-$1$ matrix and $A_t\theta_{t-1}$ can be obtained in $O(d)$, which is attractive due to the cheap per time step computational requirement.\par
+
+A critical aspect in the design of LSA algorithms is the choice of the step-size sequence $(\alpha_t)_{t\geq 0}$: poor choices lead to slow convergence, or instability. In particular, the convergence rates can degrade, or they may depend on problem dependent constants \cite{bach-moulines}, which can be very large. Diminishing step-sizes such as $\alpha_t=\frac{c_0}{t+c}$, with problem specific tuning of the constants $c>0,c_0>0$ have been used in practice\cite{gtd2,gtdmp,konda-tsitsiklis}. An alternate idea, which we call the constant-step size averaged LSA (CALSA) is to run \eqref{eq:lsaintro} by choosing $\alpha_t=\alpha>0$ $\forall t\geq 0$ with some $\alpha>0$, and output the average $\thh_t\eqdef\frac{1}{t+1}\sum_{i=0}^t \theta_i$. Thus, in CALSA, $\theta_t$ is an internal variable and $\thh_t$ is the output of the algorithm. The idea is that the constant step-size leads to faster forgetting of initial conditions, while the averaging on the top reduces noise. This idea goes back to  \citet{ruppert} and \citet{polyak-judisky} who considered it in the context of stochastic approximation that LSA is a special case of. 
+% Here, $\alpha_t\to0$ circumvents the need for guessing the magnitude of step-sizes that stabilize the updates, while the condition $\sum_{t\geq 0} \alpha_t=\infty$ ensures that initial conditions are forgotten and the condition  $\sum_{t\geq 0} \alpha^2_t<\infty$ ensures that the variance eventually goes to zero.  
+
+\textbf{Design Questions:} A useful design criterion for CALSA algorithms would be to require them to work in a problem instance independent manner for a given class of  problems. We break down this design criterion into the following two question: $(i)$ whether there exists a \emph{universal} constant step-size, and $(ii)$ whether the behavior of the algorithm is \emph{uniform} across all the problem instances of the class. The idea is that the universal step-size can be used across all the instances thereby alleviating the need of instance dependent tuning of the step-sizes. In this paper, we measure the performance of the algorithm by the mean squared error $\EE{\norm{\thh_t-\ts}^2_M}$ (where $M$ is a positive definite matrix). Here, we look at uniform behavior in the finite time as well as asymptotic (a weaker condition) sense. By uniform finite time behavior, we mean a convergence rate of $\frac{C}{t}$ for the MSE, where the constant $C>0$ independent of the problem instance. And uniform asymptotic behavior means a convergence rate of $\frac{C_P}{t}$, where the constant $C_P>0$ is dependent on the problem instance, however, in the asymptotic sense the algorithm achieves a $O(\frac{1}{t})$ rate on all problem instances.
+
+\textbf{Motivation:} Recently, \citet{bach} considered, what we call a constant step-size averaged stochastic gradient descent (CASGD) 
+%\footnote{SGD for this problem class is an LSA of the form in \eqref{eq:lsaintro}.}
+ algorithm for the linear least squares prediction problem (with \iid sampling) and showed that there exists both universal step-size and a uniform convergence rate of $\frac{C}{t}$ for the mean squared prediction error,
+ %\footnote{The mean squared prediction error is given by $\EE{\norm{\thh_t-\ts}^2_M}$, where $M$ is the co-variance of the features.}
+ where the constant $C>0$ is independent of the problem instance. 
+
+\textbf{Focus:} We are interested in TD class of algorithms that are also LSA algorithms. Specifically, we look at CATD(0) and CAGTD algorithms, which are TD(0) and GTD algorithms with constant step-size and iterate averaging. Here, we want to repeat the feat of \cite{bach}, i.e., we want to find out whether the CATD(0) and CAGTD can be designed in a problem independent manner, i.e., whether these algorithms achieve a uniform convergence rate with a universal step-size for useful classes of APE problems. We answer these question in the following manner:
+\begin{enumerate}[leftmargin=*]%, before = \leavevmode\vspace{-\baselineskip}]
+%\item \textbf{Sampling model:} We assume that $(b_t,A_t)$ is distributed $\iid$ with bounded variance, and that the matrix $\EEP{A_t}$ is \emph{Hurwitz}, i.e., all its eigenvalues have positive real parts. This case, in which $A_t\,s$ are random is called the multiplicative noise case, since the noise in $A_t$ gets multiplied by the iterate $\theta_t$. 
+\item \textbf{Finite-time Instance Dependent Bounds} ( \Cref{sec:mainresults}). When $\EE{A_t}$ is Hurwitz\footnote{All eigenvalues of a  \emph{Hurwitz} matrix have positive real parts.}, we show that (under our stated assumptions) there exists an $\alpha_P>0$\footnote{$P$ stands for problem, typically characterized by the underlying distribution.} such that for any $\alpha\in (0,\alpha_P)$,
+the MSE $\EE{\normsm{\thh_t-\ts}^2}$
+is at most $\frac{C_{P,\alpha}}{t}+\frac{C_{P',\alpha}}{t^2}$ with some positive constants $C_{P,\alpha},C_{P',\alpha}$ that we explicitly compute from $P$.
+Our result here, is an extension of the result by \citet{polyal-judisky} to the multiplicative noise case, wherein the iterates $\theta_{t-1}$ multiply the noise $A_t$.
+
+%The MSE can further be broken down to a \emph{bias} term (arising due to the initial condition $\theta_0$) that decays at a rate $O(\frac{1}{t^2})$ and a \emph{variance} term (due to the noise) that decays at at rate $O(\frac{1}{t})$.
+\item \textbf{Negative Results:} (\Cref{sec:landscape}), we present examples of simple yet insightful problem classes to show that $i)$ \emph{universal} constant step-size don't exist always, and $ii)$ \emph{uniform} finite time rate of $O(\frac{1}{t})$ can be achieved only when the problem has special properties (such as in \cite{bach}). 
+\item \textbf{Reinforcement Learning}(\Cref{sec:mainresults}) We define two APE problem classes namely $\P_{APE}$ and $\P_{SOFS}$ and show that CATD(0) and CAGTD achieve a uniform asymptotic rate of $O(\frac{1}{t})$ for classes $\P_{SOFS}$ and $\P_{APE}$ respectively, with respective universal constant step-sizes.
+\end{enumerate}%In the main body of the paper we present the results and the proofs are presented in the supplementary material. 
+We wish to mention that other computationally cheap methods such as those based on matrix sketching idea, could be a viable alternative to  CALSA. However, especially in RL, LSA has been at the heart of the widely used TD algorithms for more than a decade, and our work unifies the understanding of such algorithms. Also, we believe understanding CALSA is foundational in the sense that in most cases of general incremental algorithms our understanding is based on their 'linearized' versions. We now present some basic notations followed throughout the paper.
+\begin{comment}
+%one can choose some step-size $\alpha$  such that $C_{P,\alpha}$ from above is uniformly bounded (i.e., replicating the result of \citet{bach}).%
+\footnote{Of course, the term $C_{P',\alpha}/t^2$ needs to be controlled, as well. Just like \citet{bach}, here we focus on $C_{P,\alpha}$, which is justified if one considers the MSE as $t\to\infty$. Further justification is that we actually find a negative result. See above.}
+%It is of interest to know that for a given LSA with CS-PR and a given class $\P$ of distributions, whether it is possible to ensure uniform performance $\forall P\in \P$. 
+We show via an example that in general this is not possible.
+%that there is a class $\P$ that does not `admit' a constant step-size $\alpha_{\P}$ that guarantees uniform performance $\forall P\in \P$. 
+In particular, the example applies to RL, hence, we get a negative result for RL, which states that from only bounds on the data one cannot choose a step-size $\alpha$ to guarantee that $C_{P,\alpha}$ of CS-PR is uniformly bounded over $\P$.
+We also define a subclass  $\P_{\text{SPD},B}$ of problems, related to SGD for LSE, that does `admit' a uniform constant step-size, thereby recovering a part of the result by \citet{bach}.
+Our results in particular shed light on the precise structural assumptions that are needed 
+to achieve a uniform bound for CS-PR. 
+For further details, see \Cref{sec:related}.
+\item \textbf{Automatic Step-Size} (\Cref{sec:stepsizes}):
+The above negative result implies that in RL one needs to choose the constant step-size based on properties of the instance $P$ to avoid the explosion of the MSE.
+To circumvent this, we propose a natural step-size tuning method to guarantee instance-dependent boundedness.
+We experimentally evaluate the proposed method and find that it is indeed able to achieve its goal on a set of synthetic examples
+where no constant step-size is available to prevent exploding MSE. %Further, it is empirically demonstrated that the method is able to find a step-size, which is close to the theoretically recommended step-size which results in the fastest convergence. \todoc{True??}
+\end{enumerate}
+%\paragraph{Implications:} 
+In addition to TD($0$), our results directly can be applied to other \emph{off-policy} TD algorithms such as GTD/GTD2 with CS-PR (\Cref{sec:related}). \todoc{How about TD($\lambda$)? Will we discuss this somewhere? Maybe in the organization section this can be mentioned.}
+%In the case of TDC only asymptotic bounds were known \cite{gtd2} and our results are a first step
+%\todoc{Why only a step? What is missing?} towards proving finite time bounds.
+In particular, our results show that the GTD class of algorithms guarantee a $O(\frac{1}{t})$ rate for MSE (without use of projections), improving on a previous result by \citet{gtdmp} that guaranteed a $O(\frac{1}{\sqrt{t}})$ rate for this class for the projected version\footnote{Projections can be problematic since they assume knowledge of $\norm{\ts}$, which is not available in practice.} of the algorithm. \todoc{And projections are problematic on their own. Will we discuss this somewhere. Or should the projection issue be a footnote here?}
+\todoc{How about Prashanth's paper? Should we mention it somewhere? The reviewers will push back if we don't.}
+%\paragraph{Organization:} The paper is organized as follows \todoc{Do not forget to fill this in.}
+\paragraph{Set up and Method:}  
+One setting that fits our assumption is 
+Our analysis for the case of general LSA does not use specific structures, and hence cannot recover entirely, the results of \citet{bach} who use the problem specific structures in their analysis.
+\end{comment}
+

@@ -1,0 +1,46 @@
+
+\section{Universal step-size in TD}
+w turn the question of universal step-sizes for CATD(0) and CAGTD algorithms in \eqref{tb:tdalgos}. In what follows, we define what we call \emph{admissibility},  a sufficient condition for the existence of a universal step-size. 
+\begin{definition}\label{def:admis}
+Call a problem class $\P$ \emph{admissible} if there exists a unique $U$ and $\alpha_{\P_U}>0$ such that
+$\rhos{P_U}>0$ holds for all $P\in \P$ and $\alpha\in(0,\alpha_{\P_U})$.
+\end{definition}
+We now define three APE problem classes considered in this paper as follows:
+\begin{comment}
+\begin{table}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|c|c|c|c|}\hline
+Class &Fixed &Variable &Remark\\\hline
+$\P_{TDON}$ & $\Phi,S,A,\gamma$ & $\pi,P,R$ &$\mu=d_{\pi}, \EE{\phi_t\phi_t}=\EE{\phi'_t\phi'_t}$\\\hline
+$\P_{TDOFF}$ & $\Phi,S,A,\gamma$ & $\pi,\mu,P,R$ &$\mu\neq d_{\pi}, \EE{\phi_t\phi_t}=\EE{\phi'_t\phi'_t}$, $\norm{\phi_t}=1$\\\hline
+$\P_{GTDOFF}$ & $\Phi,S,A,\gamma$ & $\pi,\mu,P,R$ &$\mu\neq d_{\pi}$\\\hline
+\end{tabular}
+}
+\end{table}
+\end{comment}
+\begin{table}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|c|c|c|c|}\hline
+Class  &Variable &Remark\\\hline
+$\P_{TDON}$  & $\pi,P,R$ &$\mu=d_{\pi}, \EE{\phi_t\phi_t}=\EE{\phi'_t\phi'_t}$\\\hline
+$\P_{TDOFF}$  & $\pi,\mu,P,R$ &$\mu\neq d_{\pi}, \EE{\phi_t\phi_t}=\EE{\phi'_t\phi'_t}$, $\norm{\phi_t}=1$\\\hline
+$\P_{GTDOFF}$ & $\pi,\mu,P,R$ &$\mu\neq d_{\pi}$\\\hline
+\end{tabular}
+}
+\end{table}
+
+\begin{comment}
+\begin{definition}
+\begin{itemize}
+\item $\P_{ON}$: Fixed $S, A, \gamma, \Phi,\pi_b,\pi$ and letting $P$ (the probability transition kernel), reward $R$ to vary such the MDP is an irreducible Markov chains under $\pi_b$ and $\pi$. Define $\P_{SOFS} \subset \P_{APE}$ be those problems such that $\E[{\phi_t\phi_t^\top}]=\E[{\phi'_t{\phi'}_t^\top}]$
+\end{itemize}
+\end{definition}
+\end{comment}
+\begin{theorem}\label{th:tdadmis}
+Define constants $B\eqdef\max_{ij}\left|\Phi_{ij}\right|$  We have 
+$i)$ CATD(0) has a universal step-size of $\alpha_{td}=\frac{1}{B^2d}$ for  the class $\P_{TDON}$.
+$ii)$ CATD(0) has a universal step-size of $\alpha_{td}=1$ for  the class $\P_{TDOFF}$.
+$ii)$ CAGTD has a universal step-size of $\alpha_{gtd}=\frac{1}{2B^4d^2}$ for the class $\P_{APE}$.
+\end{theorem}
+\textbf{Proof details:} The proof of \Cref{th:tdadmis} boils down to showing that $\P_{SOFS}$ and $\P_{APE}$ are admissible for CATD(0) and CAGTD. In turns out that, no additional change of basis is required and we let $U=I$. Also, from \Cref{tb:tdalgos}, the matrix $\Delta_t=\phi_t(\phi_t-\gamma\phi'_t)^\top$ is key to both CATD(0) and CAGTD. In the case of CATD(0),  the expression for $\rhos{P}$ involves $\phi^\top_t\phi_t$ which can take a maximum value of $B^2d$ (as per our assumption in \Cref{th:tdadmis}), and is the reason for the $B^2d$ term in $\alpha_{td}$. In the case of CAGTD, the expression for $\rhos{P}$ involves $\Delta_t^\top \Delta_t$, and hence $B^4d^2$ appears in $\alpha_{gtd}$. It turns out the step-sizes $\alpha_{td}$ and $\alpha_{gtd}$ need to scale down by a factor of $\rho_{\max}$ ( which can be much higher than $1$). The conservative step-size for CAGTD seems to be the price paid for \emph{off-policy} stability.
+

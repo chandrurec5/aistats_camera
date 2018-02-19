@@ -1,0 +1,123 @@
+%!TEX root =  flsa.tex
+\section{Problem Setup}\label{sec:prob}
+In this section we introduce the \emph{constant step-size averaged linear stochastic approximation} (CALSA) algorithm, state and discuss the assumptions under which we study CALSA and then present two instance of learning problems where CALSA is applied. A  CALSA algorithm is given by:
+\begin{subequations}\label{eq:lsa}
+\begin{align}
+\label{conststep}&\text{LSA:} &\theta_t&=\theta_{t-1}+\alpha(b_t-A_t\theta_{t-1})\,,\\
+\label{iteravg}&\text{PR-Average:} &\thh_t&=\frac{1}{t+1}{\sum}_{s=0}^{t}\,\theta_i\,.
+\end{align}
+\end{subequations}
+The algorithm updates a pair of parameters $\theta_t,\tb_t\in \R^{d}$ incrementally, in discrete time steps $t=1,2,\dots$
+based on data $(b_t,A_t)\in \R^d\times\R^{\dcd}$. Here $\alpha>0$ is a positive step-size parameter; an input to the algorithm besides the
+initial value $\theta_0$. The iterate $\theta_t$ is treated as an internal state of the algorithm, while $\thh_t$ is the output at time step $t$. The update of $\theta_t$ alone is considered a form of constant step-size LSA. Note that \eqref{conststep} alone is known as a linear stochastic approximation (LSA) algorithm.
+
+\textbf{Applications of CALSA:} Sometimes $A_t$ will have a special form (such as a rank-$1$ structure) and then the matrix-vector product $A_t \theta_{t-1}$ can also be computed in $O(d)$ time, a scenario common in reinforcement learning \cite{sutton,konda-tsitsiklis,gtd,gtd2,gtdmp}, see also \Cref{ex:linpred,ex:ape}. This makes the algorithm particularly attractive in large-scale computations when $d$ is in the range of thousands, or millions, or more, as may be required by modern applications (e.g., \citep{LiMaTaBo16}). 
+
+We are interested in the mean squared error (MSE) at time $t$ given by $\EE{\normsm{\thh_t-\ts}^2_M}$ (where $M$ is a positive definite matrix) under the following assumptions:
+\begin{assumption}\label{assmp:lsa}
+\begin{enumerate}[leftmargin=*, before = \leavevmode\vspace{-\baselineskip}]
+\item \label{dist} $(b_t, A_t)$, $t\geq 0$ is an \iid sequence distributed as $P$. Let $A_P\eqdef\EE{A_t}$ and $b_P\eqdef\EE{b_t}$, and we assume that $A_P$ is \emph{Hurwitz} (a matrix whose eigenvalues have positive real parts).
+\item $A_P$ is invertible and thus the vector $\ts=A^{-1}_Pb_P$ is well-defined.
+\item \label{matvar}  The martingale difference sequences $M_t\eqdef A_t-A_{P}$ and $N_t\eqdef b_t-b_{P}$ satisfy the following 
+\begin{align*}
+	\EE{\norm{M_t}^2\mid\F_{t-1}}\leq \sigma^2_{A}\,, 
+\EE{\norm{N_t}^2\mid\F_{t-1}} \leq\sigma^2_{b}\,,
+\end{align*} 
+where $F_t$ is an increasing sequence of $\sigma$-fields defined $\forall t > 1$ as: $\F_{t-1}\eqdef\sigma\{\theta_0,A_1,\ldots, A_{t-1}, b_1,\ldots, b_{t-1}\}$; $\F_{0}$ is the trivial $\sigma$ algebra.
+with some $\sigma^2_{A}$ and $\sigma^2_{b}$. 
+\end{enumerate}
+\end{assumption}
+Here we consider the \emph{multiplicative noise} case, where the noise in $A_t$ multiplies with the iterates $\theta_{t-1}$. In RL applications typically $A_P$ is known to be \emph{Hurwitz} and invertible (Hurwtiz matrices is a superset of real symmetric positive definite matrices). Note that `Hurwitz'-ness is necessary; it is trivial to construct examples where $A_P$ has negative eigenvalues and the iterates blow to infinity (i.e., $\norm{\theta_t}\ra\infty$ as $t\ra\infty$). However, invertibility might not hold in cases such as \cite{bertstab}, and is not within the scope of this paper. And finally, the boundedness of the variances has also been assumed. 
+\begin{example}\label{ex:linpred}[Linear prediction with bounded data]
+Let $(x_t,y_t)\in \R^{d}\times \R, t\geq 0$ be $\iid \sim P_{LP}$ and for some $B>0$, let $\P_{LPB}=\{  P_{LP}: \norm{x_t}<B, y_t<B \}$ be a class of distributions. The linear prediction problem is predict/approximate unseen $y_t$ as $y_t\approx \ip{x_t,\theta}$, where $\theta\in\R^d$ and the aim is to compute a $\ts=\arg\min_{\theta\in\R^d} \EE{\norm{y_t-\ip{x_t,\theta}}^2}$. The constant step-size stochastic gradient descent (CASGD) algorithm for this problem is given by: $
+\theta_t=\theta_{t-1}+\alpha(x_t y_t-x_tx_t^\top\theta_{t-1}), \thh_t=\frac{1}{t+1}{\sum}_{s=0}^{t}\,\theta_i$. The mean square prediction error of CASGD is given by $\E{\norm{\thh_t-\ts}^2_A}$ (where $A=\EE{A_t}=\EE{x_tx_t^\top}$). Here, $\P_{LPB}$ is the class of linear prediction problems with bounded data.
+\end{example}
+\begin{comment}
+\begin{table}[H]
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|c|c|}\hline
+TD(0)& GTD\\ \hline
+$\begin{aligned}\label{eq:td}
+\quad\delta_t &= r_t+(\gamma \phi'_t-\phi_t)^\top \theta_t,\\
+\quad\theta_{t+1}&= \theta_t+\alpha \rho_t\phi_t (\delta_t),\\
+\quad\thh_{t} &= \frac{1}{t+1}\sum_{s=0}^t \theta_s
+\end{aligned}
+$ & $\begin{aligned}\label{eq:gtd}
+\quad\Delta_t&=\phi_t(\gamma \phi'_t-\phi_t)^\top,\\
+y_{t+1}&=y_t+\beta\rho_t(\phi_t r_t+\Delta_t\theta_t -y_t),\\
+\theta_{t+1}&=\theta_t+\alpha\Delta_t^\top y_{t+1}\\
+\thh_{t}&=\frac{1}{t+1}\sum_{s=0}^t \theta_s, \hat{y}_{t}=\frac{1}{t+1}\sum_{s=0}^t y_s, 
+\end{aligned}
+$ \\\hline
+\end{tabular}
+}
+\caption{Shows the TD(0) and GTD algorithms. In this paper, we let $\beta=\alpha$ in GTD. It is straightforward to write down appropriate $A_t$ and $b_t$ for the two algorithms, and we leave it as an exercise. 
+}
+\label{tb:tdalgos}
+\end{table}
+\end{comment}
+
+\begin{table}[H]
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|c|c|}\hline
+TD(0)& GTD\\ \hline
+$\begin{aligned}\label{eq:td}
+\quad\theta_{t}&= \theta_{t-1}+\alpha(b_t-A_t\theta_{t-1}),\\
+\quad\thh_{t} &= \frac{1}{t+1}\sum_{s=0}^t \theta_s
+\end{aligned}
+$ & $\begin{aligned}\label{eq:gtd}
+y_{t}&=y_t+\beta(b_t +A_t\theta_{t-1} -y_{t-1}),\\
+\theta_{t}&=\theta_{t-1}+\alpha\Delta_t^\top y_{t}\\
+\thh_{t}&=\frac{1}{t+1}\sum_{s=0}^t \theta_s, \hat{y}_{t}=\frac{1}{t+1}\sum_{s=0}^t y_s, 
+\end{aligned}
+$ \\\hline
+\end{tabular}
+}
+\caption{Here $A_t=\phi_t(\gamma \phi'_t-\phi_t)^\top$, and $b_t=\phi_t r_t$. Shows the TD(0) and GTD algorithms. In this paper, we let $\beta=\alpha$ in GTD. It is straightforward to write the algorithms in the form given in \eqref{eq:lsa}, and we leave it as an exercise.
+}
+\label{tb:tdalgos}
+\end{table}
+
+
+
+\begin{comment}
+\begin{table}[H]
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|c|c|}\hline
+TD(0)& GTD\\ \hline
+$\begin{aligned}\label{eq:td}
+\quad\theta_{t}&= \theta_{t-1}+\alpha (b_t-A_{t),\\
+\quad\thh_{t} &= \frac{1}{t+1}\sum_{s=0}^t \theta_s
+\end{aligned}
+$ & 
+$\begin{aligned}\label{eq:gtd}
+\left[\begin{matrix}y_t\\\theta_t\end{matrix}\right]&=\left[\begin{matrix}y_{t-1}\\\theta_{t-1}\end{matrix}\right]+\alpha\rho_t \left(\left[\begin{matrix} b_t \\ \mathbf{0} \end{matrix}\right] -\left[\begin{matrix} I & -A_t\\ A_t^\top &\mathbf{0} \end{matrix}\right]\right)\\
+\thh_{t}&=\frac{1}{t+1}\sum_{s=0}^t \theta_s, \hat{y}_{t}=\frac{1}{t+1}\sum_{s=0}^t y_s, 
+\end{aligned}
+$ \\\hline
+\end{tabular}
+}
+\caption{Here $A_t=\phi_t(\gamma \phi'_t-\phi_t)^\top$, and $b_t=\phi_t r_t$. Shows the TD(0) and GTD algorithms. In this paper, we let $\beta=\alpha$ in GTD. It is straightforward to write $A_t$ and $b_t$ for the two algorithms, and we leave it as an exercise. 
+}
+\label{tb:tdalgos}
+\end{table}
+\end{comment}
+
+\begin{example}\label{ex:ape}[Approximate policy evaluation (APE)]
+\begin{comment}
+We consider Markov decision processes (MDPs) with finite state space $S$ and action space $A$. Under a policy $\pi$ a MDP is a Markov chain with probability transition kernel $P_\pi=(p_\pi(s,\cdot),s\in S)$ which specifies the probability distributions over next state for given state $s$. The data is presented as $D_t=(s_t,s'_t,r_t)$, where $s_t\sim \iid \mu$ and $s'_t\sim p_{\pi}$ and $r_t=R_{a_t}(s_t)$, where $a_t\sim \pi_b(s,\cdot)$ and $R: S\times A\ra \R$. Here, based on $\mu$ we have two different settings namely, the \emph{on-policy} setting where $\mu=d_{\pi}$ is the stationary distribution of  the \emph{target} policy and the \emph{off-policy} setting where $\mu$ is any arbitrary distribution. 
+The problem of approximate policy evaluation (APE) of policy $\pi$ involves learning the value function $V_\pi \in \R^{|S|}$. Typically $S$ is large and hence $V_\pi$ is approximated as $V_\pi\approx\Phi\ts$, where $\Phi$ is a $|S|\times d$ matrix and $\ts\in\R^d$ needs to be learnt from data. \Cref{tb:tdalgos}specifies two important algorithms to solve APE namely TD(0) and GTD, where $\phi_t=\Phi(s_t,\cdot)\in \R^d$ and $\phi'_t=\Phi(s'_t,\cdot)\R^d$ are the ${s_t,s'_t}^{th}$ rows of the feature matrix $\Phi$. 
+\end{comment}
+Consider a \emph{Markov Decision Process} given by the tuple $\langle S,A,P,R,\gamma \rangle$, where $S$ is the state space, $A$ is the action space, $P$ is the probability transition kernel which specifies the probability $p_a(s,s')$ of transitioning from state $s\in S$ to state $s'\in S$ under an action $a\in A$, and $R=(r_a(s),a\in a,s\in S)$ specifies the reward $r_a(s)$ of performing action $a$ in state $s$. A policy is a map $\pi$ that specifies a probability distribution $\pi(\cdot | s)$ over $A$ for any given $S$. The policy evaluation problem deals with computing $V_\pi=R_\pi+\gamma P_\pi$, where $R_\pi(s)=\E_{a\sim \pi(\cdot|s)}[r_a(s)]$ and $V_\pi,R_\pi \in \R^{|S|},P_\pi\in\R^{|S|\times|S|}$. 
+In this paper, we consider an important problem namely approximate policy evaluation (APE) in an $\iid$ sampling setting, where we are presented samples from stationary distribution $d_{\pi_b}$ of a \emph{behavior} policy $\pi_b$ and have to learn the value function of a target policy $\pi$. The data is given by the sequence  $D_t=(s_t,s'_t,r_t,a_t),t\geq 0$ where $s_t\sim \mu$,  $s'_t\sim p(s_t,\cdot)$, $a_t\sim\pi_b(s_t)$ and $r_t=r_{a_t}(s_t)$. Here, based on $\mu$ we have two different settings namely, the \emph{on-policy} setting where $\mu=d_{\pi}$ is the stationary distribution of  the \emph{target} policy and the \emph{off-policy} setting where $\mu$ is any arbitrary distribution. In the problem of APE, the aim is to approximate $V_\pi \approx \Phi \ts$, where $\Phi\in \R^{|S|\times d}$ is a feature matrix and $\ts$ is a weight vector to be learnt. Two important TD algorithms that we are interested in this paper namely  TD(0) and gradient temporal difference (GTD) are given as follows in \Cref{tb:tdalgos}.
+
+%One can define $\P_{APE}$ to be the class of all APE problems with fixed $|S|$ and $|A|$ restricting to those policies that give rise to an irreducible Markov chains and restricting the entires of $\Phi$ to be bounded.
+\end{example}
+%We wish to understand how the MSE is affected by the choice of $\alpha$ and the spectral properties of $A_P$. Another aspect of interest is to understand the contribution of the \emph{bias} (caused by the initial condition $\theta_0$) and the \emph{variance} (caused by $\sigma^2_P,\sigma^2_b$) to the MSE.\par
+\todoch{Mention importance of forgetting the bias etc. Mention that we really don't have control over $\norm{U}$}
+%\textbf{Goal and message:} We are interested in designing TD algorithms for the class $\P_{APE}$ of APE problems in a problem independent manner, by which we mean a \emph{universal} constant step-size that can be chosen for the class. We also want to understand the behavior of the algorithms across the class. We are motivated by the recent results by \citet{bach} who showed that CASGD with a universal step-size achieves uniform $O(\frac{C}{t})$ rate for the mean squared prediction error for the class $\P_{LPB}$. Hhere $C>0$ does not depend on the problem instance. In the case of TD algorithms for $\P_{APE}$ there exists universal constant step-size that achieves a $\frac{C_P}{t}$ rate of convergence for the mean squared error, where $C_P>0$ is a problem dependent constance. We also show by arguments in \Cref{sec:landscape} that this problem dependent constant in the convergence rate can be eliminated only under specific structure (such as those used by \citet{bach}).
+\begin{comment}
+However, before we proceed on to the main goals, we first try our luck with simpler problem classes to investigate.
+We are interested in the behavior of CALSA on a single problem instance as well as class of problems. However, before
+ Thus, first we show (in \Cref{th:rate} ) that under \Cref{assmp:lsa} there is a problem dependent constant step-size $\alpha_P$ with which the CALSA in \eqref{eq:lsa} achieve a rate of $O(\frac{C_P}{t})$,  where $C_P>0$ is a problem dependent constant. We then understand conditions under which this problem dependence in the step-size $\alpha_P$ and in the constant $C_P$ in the rate can be removed.
+\end{comment}
